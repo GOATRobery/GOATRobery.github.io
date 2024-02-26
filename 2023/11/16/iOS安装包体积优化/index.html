@@ -199,10 +199,10 @@
 
   <h3 id="一-背景"><a href="#一-背景" class="headerlink" title="一  背景"></a>一  背景</h3><p>最近将2019年上线的包进行更新适配上线到App Store, 发现安装包体积从原本的52M增加到了157M的大小. 前人做了什么,为什么安装包size会增加这么多,不懂但大为震撼,惊讶之余减包优化势在必行.</p>
 <h3 id="二-分析安装包组成"><a href="#二-分析安装包组成" class="headerlink" title="二 分析安装包组成"></a>二 分析安装包组成</h3><p><code>Archive</code>打包以后, 我们可以从<code>ProjectName.xcarchive</code>中看到如下结构:</p>
-<p><strong>iOS 13以后</strong> </p>
+<p><strong>iOS13 以后</strong> </p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1. Info.plist </span><br><span class="line">2. dSYM </span><br><span class="line">3. Products</span><br></pre></td></tr></table></figure>
 
-<p><strong>iOS 13以前</strong> </p>
+<p><strong>iOS13 以前</strong> </p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1. Info.plist </span><br><span class="line">2. dSYM </span><br><span class="line">3. Products</span><br><span class="line">4. swift.support</span><br></pre></td></tr></table></figure>
 
 
