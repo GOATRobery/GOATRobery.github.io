@@ -166,7 +166,7 @@
 <p><strong>压缩策略:</strong>  </p>
 <ul>
 <li>采用有损压缩方式, 最大化Apple图片压缩优化比例。  </li>
-<li>更换显示图片文件格式, 如: <code>iconfront</code>、<code>.webpg</code>、<code>.pdf</code>、<code>.svg</code>等。<br>未证实说法: 使用<code>pdf</code>格式图片, Apple自动转化为所需要的图片。</li>
+<li>更换显示图片文件格式, 如: <code>HEIC</code>、<code>iconfront</code>、<code>.webpg</code>、<code>.pdf</code>、<code>.svg</code>等。<br>未证实说法: 使用<code>pdf</code>格式图片, Apple自动转化为所需要的图片。</li>
 </ul>
 <p>除图片资源外, 视频、音频等本地资源也可压缩文件的体积。</p>
 <h3 id="4-本地资源远端加载-远端服务器请求-官方ODR"><a href="#4-本地资源远端加载-远端服务器请求-官方ODR" class="headerlink" title="4. 本地资源远端加载(远端服务器请求&#x2F;官方ODR)"></a>4. 本地资源远端加载(远端服务器请求&#x2F;官方ODR)</h3><p><a target="_blank" rel="noopener" href="https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/On_Demand_Resources_Guide/index.html#//apple_ref/doc/uid/TP40015083">On Demand Resources</a>延迟加载资源, 通过设置<code>Resources Tag</code>标记位, 可选择随包下载以及按需加载资源。  </p>
@@ -179,11 +179,13 @@
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>引用自<a target="_blank" rel="noopener" href="https://live.byteoc.com/9281/2083745">字节跳动技术分享沙龙直播</a>内容。  </p>
 <p><strong>安装包体积优化方案总结:</strong><br><img src="https://github.com/GOATRobery/common-Resources/blob/e37c50bdae470efcf81329b00f5dd58e648bd9cf/%E5%AE%89%E8%A3%85%E5%8C%85%E4%BD%93%E7%A7%AF%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88%E6%80%BB%E7%BB%93.png?raw=true" alt="安装包体积优化方案总结"></p>
 <p><strong>无用代码筛查:</strong><br><img src="https://github.com/GOATRobery/common-Resources/blob/e37c50bdae470efcf81329b00f5dd58e648bd9cf/%E6%97%A0%E7%94%A8%E4%BB%A3%E7%A0%81%E7%AD%9B%E6%9F%A5.png?raw=true" alt="无用代码筛查">   </p>
+<p><strong>编译配置优化:</strong><br><img src="https://raw.githubusercontent.com/GOATRobery/common-Resources/main/images/zoom-in-crop-mark_1512_0_0_0.webp" alt="编译配置优化"></p>
 <h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
 <li><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/xcode/build-settings-reference/">Xcode配置说明官方文档</a>  </li>
 <li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/I6DH5RvkMh_-bxGpkAKBPA">Alibaba安装包瘦身(精华)</a></li>
 <li><a target="_blank" rel="noopener" href="https://blog.csdn.net/ByteDanceTech/article/details/112504772">抖音品质建设 - iOS 安装包大小优化实践篇</a></li>
 <li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/516628980">搜狐技术,iOS包体积优化</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/_Mvl0FGriKsvAyRheU2Z7w">搜狐技术,正经分析包体积优化</a></li>
 <li><a target="_blank" rel="noopener" href="https://sq.sf.163.com/blog/article/200384401846304768">网易Cocoapods 中的优化选项配置</a></li>
 <li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/oyqAa8wKdioI5ZDG5LjkfA">今日头条减包(大部分已过时)</a></li>
 <li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzI1MzYzMjE0MQ==&mid=2247487459&idx=1&sn=3dd9276f5af78ca5a377adec37e3e916&chksm=e9d0c401dea74d17e9f1bdd5ea764cc0cd7e845c6ebadde752d36608306b09e762a1681c7252&scene=21#wechat_redirect">今日头条二进制压缩减包</a></li>
