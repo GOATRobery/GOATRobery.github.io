@@ -162,4 +162,92 @@
         <tag>iOS底层</tag>
       </tags>
   </entry>
+  <entry>
+    <title>单例设计模式实现方式对比</title>
+    <url>/2020/03/20/%E5%8D%95%E4%BE%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%AF%B9%E6%AF%94/</url>
+    <content><![CDATA[<h2 id="1-什么是单例"><a href="#1-什么是单例" class="headerlink" title="1.什么是单例"></a>1.什么是单例</h2><p>确保对于一个给定的类只有一个实例存在，这个实例有一个全局唯一的访问点。<br>可以保证在程序运行过程，一个类只有一个实例，而且该实例易于供外界访问，从而方便地控制了实例个数，并节约系统资源。</p>
+<h2 id="2-单例能做什么"><a href="#2-单例能做什么" class="headerlink" title="2.单例能做什么"></a>2.单例能做什么</h2><ul>
+<li>在整个应用程序中，共享一份资源（这份资源只需要创建初始化1次），这个类创建出来的对象永远只有一个。</li>
+<li>使用场景：</li>
+</ul>
+<blockquote>
+<ol>
+<li>工具类 </li>
+<li>频繁创建的类(比如登录页，未登录状态下，某些触发条件会调出登录页)</li>
+</ol>
+</blockquote>
+<h2 id="3-单例的实现"><a href="#3-单例的实现" class="headerlink" title="3.单例的实现"></a>3.单例的实现</h2><h3 id="3-1-实现的方式"><a href="#3-1-实现的方式" class="headerlink" title="3.1 实现的方式"></a>3.1 实现的方式</h3><h4 id="1-命名方式："><a href="#1-命名方式：" class="headerlink" title="1&gt; 命名方式："></a>1&gt; 命名方式：</h4><blockquote>
+<p>share+类名 | default + 类名 | share | 类名 </p>
+</blockquote>
+<p>如：<code>+(instancetype)sharedSingle;</code> </p>
+<h4 id="2-实现代码"><a href="#2-实现代码" class="headerlink" title="2&gt; 实现代码"></a>2&gt; 实现代码</h4><h5 id="1-未使用单例："><a href="#1-未使用单例：" class="headerlink" title="1) 未使用单例："></a>1) 未使用单例：</h5><figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="type">RTTool</span> <span class="operator">*</span>tool_1 <span class="operator">=</span> [[<span class="type">RTTool</span> alloc] <span class="keyword">init</span>];</span><br><span class="line"><span class="type">RTTool</span> <span class="operator">*</span>tool_2 <span class="operator">=</span> [[<span class="type">RTTool</span> alloc] <span class="keyword">init</span>];</span><br><span class="line"><span class="type">RTTool</span> <span class="operator">*</span>tool_3 <span class="operator">=</span> [[<span class="type">RTTool</span> alloc] <span class="keyword">init</span>];</span><br><span class="line"><span class="type">NSLog</span>(@<span class="string">&quot;<span class="subst">\n</span> tool_1:%p <span class="subst">\n</span> tool_2:%p <span class="subst">\n</span> tool_3:%p&quot;</span>,tool_1,tool_2,tool_3); </span><br></pre></td></tr></table></figure>
+<p>打印对象地址：<br><img src="https://upload-images.jianshu.io/upload_images/4395241-1395e4cf9a5cc7e5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="No Single.png"><br>可以观察到，三份地址都不同。 </p>
+<h5 id="2-使用单例："><a href="#2-使用单例：" class="headerlink" title="2) 使用单例："></a>2) 使用单例：</h5><p><code>互斥锁</code>： </p>
+<figure class="highlight objectivec"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> RTTool *_instance; <span class="comment">//提供全局静态变量(作用域结束，本身不可修改) </span></span><br><span class="line"><span class="comment">/// 调用alloc真正实现内存分配的方法</span></span><br><span class="line">+ (<span class="keyword">instancetype</span>)allocWithZone:(<span class="keyword">struct</span> _NSZone *)zone &#123;</span><br><span class="line">    <span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span>(_instance == <span class="literal">nil</span>) &#123;</span><br><span class="line">            _instance = [<span class="variable language_">super</span> allocWithZone:zone];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> _instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>GCD一次代码</code>： </p>
+<figure class="highlight objectivec"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> RTTool *_instance; <span class="comment">//提供全局静态变量  </span></span><br><span class="line"><span class="comment">/// 调用alloc真正实现内存分配的方法</span></span><br><span class="line">+ (<span class="keyword">instancetype</span>)allocWithZone:(<span class="keyword">struct</span> _NSZone *)zone &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">dispatch_once_t</span> onceToken;</span><br><span class="line">    <span class="comment">// 参数取地址的好处？</span></span><br><span class="line">    <span class="built_in">dispatch_once</span>(&amp;onceToken, ^&#123;</span><br><span class="line">        _instance = [<span class="variable language_">super</span> allocWithZone:zone];</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> _instance;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>打印对象地址： </p>
+<p><img src="https://upload-images.jianshu.io/upload_images/4395241-beda448439efbf33.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Single.png">  </p>
+<p>可以观察到，三份地址<code>完全相同</code>。 </p>
+<h5 id="提供可供外界访问的便捷方法"><a href="#提供可供外界访问的便捷方法" class="headerlink" title="提供可供外界访问的便捷方法"></a>提供可供外界访问的便捷方法</h5><figure class="highlight objectivec"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> RTTool *_instance; <span class="comment">//提供全局静态变量</span></span><br><span class="line">+ (<span class="keyword">instancetype</span>)shareManager &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">dispatch_once_t</span> onceToken;</span><br><span class="line">    <span class="comment">// 参数取地址的好处？</span></span><br><span class="line">    <span class="built_in">dispatch_once</span>(&amp;onceToken, ^&#123;</span><br><span class="line">        _instance = [[<span class="keyword">self</span> alloc] init];</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> _instance;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//+ (instancetype)shareManager &#123;</span></span><br><span class="line"><span class="comment">//    return [[self alloc] init];</span></span><br><span class="line"><span class="comment">//&#125;</span></span><br></pre></td></tr></table></figure>
+<p>然后我们就可以这样调用 </p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="type">RTTool</span> <span class="operator">*</span>tool_1 <span class="operator">=</span> [[<span class="type">RTTool</span> alloc] <span class="keyword">init</span>];</span><br><span class="line"><span class="type">RTTool</span> <span class="operator">*</span>tool_2 <span class="operator">=</span> [[<span class="type">RTTool</span> alloc] <span class="keyword">init</span>];</span><br><span class="line"><span class="type">RTTool</span> <span class="operator">*</span>tool_3 <span class="operator">=</span> [[<span class="type">RTTool</span> alloc] <span class="keyword">init</span>];</span><br><span class="line"><span class="type">RTTool</span> <span class="operator">*</span>tool_4 <span class="operator">=</span> [<span class="type">RTTool</span> shareManager]; <span class="comment">//便捷访问方法</span></span><br><span class="line"><span class="type">NSLog</span>(@<span class="string">&quot;<span class="subst">\n</span> tool_1:%p <span class="subst">\n</span> tool_2:%p <span class="subst">\n</span> tool_3:%p <span class="subst">\n</span> tool_4:%p&quot;</span>,tool_1,tool_2,tool_3,tool_4);</span><br></pre></td></tr></table></figure>
+<h5 id="完整的Singleton实现方式"><a href="#完整的Singleton实现方式" class="headerlink" title="完整的Singleton实现方式"></a>完整的Singleton实现方式</h5><p>需要遵守拷贝协议</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">@<span class="keyword">interface</span> <span class="symbol">RTTool</span>()&lt;<span class="symbol">NSCopying</span>,<span class="symbol">NSMutableCopying</span>&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight objectivec"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> RTTool *_instance; <span class="comment">//提供全局静态变量</span></span><br><span class="line">+ (<span class="keyword">instancetype</span>)shareManager &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">dispatch_once_t</span> onceToken;</span><br><span class="line">    <span class="comment">// 参数取地址的好处？</span></span><br><span class="line">    <span class="built_in">dispatch_once</span>(&amp;onceToken, ^&#123;</span><br><span class="line">        _instance = [[<span class="keyword">self</span> alloc] init];</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> _instance;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//+ (instancetype)shareManager &#123;</span></span><br><span class="line"><span class="comment">//    return [[self alloc] init];</span></span><br><span class="line"><span class="comment">//&#125;</span></span><br><span class="line"><span class="comment">/// MARK: - 拷贝操作的时候，我们的_instance已经存在了，直接返回给调用方即可</span></span><br><span class="line">- (<span class="type">id</span>)copyWithZone:(<span class="built_in">NSZone</span> *)zone &#123;</span><br><span class="line">    <span class="keyword">return</span> _instance;</span><br><span class="line">&#125;</span><br><span class="line">- (<span class="type">id</span>)mutableCopyWithZone:(<span class="built_in">NSZone</span> *)zone &#123;</span><br><span class="line">    <span class="keyword">return</span> _instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="调用及结果："><a href="#调用及结果：" class="headerlink" title="调用及结果："></a>调用及结果：</h5><p><img src="https://upload-images.jianshu.io/upload_images/4395241-3ee5df2156a65c19.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Single.png"></p>
+<h4 id="3-2-static的作用"><a href="#3-2-static的作用" class="headerlink" title="3.2 static的作用"></a>3.2 static的作用</h4><p>编译时分配内存，程序结束时释放内存单元。</p>
+<h5 id="3-2-1-作用于变量"><a href="#3-2-1-作用于变量" class="headerlink" title="3.2.1 作用于变量"></a>3.2.1 作用于变量</h5><p>作用范围：本文件内部有效&#x2F;本作用域有效。</p>
+<ul>
+<li>1.局部变量<br>改变变量的存储方式（生命期），使变量成为静态的局部变量。即编译时就为变量分配内存，直到程序退出才释放存储单元。<br>延长局部变量的生命周期，作用范围为局部变量作用域。<br>好处：使得该局部变量有记忆功能，可以记忆上次的数据，不过由于仍是局部变量，因而只能在代码块内部使用（作用域不变）。<figure class="highlight arduino"><table><tr><td class="code"><pre><span class="line">&#123; </span><br><span class="line">  <span class="type">static</span> <span class="type">int</span> a; <span class="comment">//作用范围为本代码块结束</span></span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure></li>
+<li>2.全局变量<br>限制某些外部变量的作用域，使其只在本文件中有效，而不能被其他文件引用。(本文单例模式static全局变量的作用即此)</li>
+</ul>
+<h5 id="3-2-2-作用于函数"><a href="#3-2-2-作用于函数" class="headerlink" title="3.2.2 作用于函数"></a>3.2.2 作用于函数</h5><p>使用static用于函数定义时，对函数的连接方式产生影响，使得函数只在本文件内部有效，对其他文件是不可见的。这样的函数又叫作静态函数。使用静态函数的好处是，不用担心与其他文件的同名函数产生干扰，另外也是对函数本身的一种保护机制。</p>
+<p>如果想要其他文件可以引用本地函数，则要在函数定义时使用关键字extern，表示该函数是外部函数，可供其他文件调用。另外在要引用别的文件中定义的外部函数的文件中，使用extern声明要用的外部函数即可。</p>
+<h5 id="3-3-synchronized作用"><a href="#3-3-synchronized作用" class="headerlink" title="3.3 @synchronized作用"></a>3.3 @synchronized作用</h5><p>@synchronized 的作用是创建一个互斥锁，保证此时没有其它线程对self对象进行修改，保证代码的安全性。也就是包装这段代码是原子性的，安全的。这个是objective-c的一个锁定令牌，防止self对象在同一时间内被其他线程访问，起到保护线程安全的作用。<br>更多使用细节<a href="http://www.cocoachina.com/articles/18279">可查看链接</a>。<br>我们在此处不推荐使用@synchronized的原因(<a href="https://www.jianshu.com/p/ef3f77c8b320">更多原因点击查看</a>)：</p>
+<ul>
+<li>1.@synchronized速度慢，消耗CPU资源比较大。</li>
+<li>2.外部调用可能导致死锁。</li>
+</ul>
+<h5 id="3-4-dispatch-once为什么能保证线程安全，参数取地址的好处"><a href="#3-4-dispatch-once为什么能保证线程安全，参数取地址的好处" class="headerlink" title="3.4 dispatch_once为什么能保证线程安全，参数取地址的好处"></a>3.4 dispatch_once为什么能保证线程安全，参数取地址的好处</h5><ul>
+<li><ol>
+<li><a href="http://lingyuncxb.com/2018/02/01/GCD%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%902%20%E2%80%94%E2%80%94%20dispatch-once%E7%AF%87/">dispatch_once</a>为什么能保证线程安全<br>核心函数dispatch_once_f：<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">dispatch_once_f</span><span class="params">(<span class="type">dispatch_once_t</span> *val, <span class="type">void</span> *ctxt, <span class="type">void</span> (*func)(<span class="type">void</span> *))</span></span>&#123;</span><br><span class="line">    <span class="keyword">volatile</span> <span class="type">long</span> *vval = val;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">dispatch_atomic_cmpxchg</span>(val, <span class="number">0l</span>, <span class="number">1l</span>)) &#123;</span><br><span class="line">        <span class="built_in">func</span>(ctxt); <span class="comment">// block真正执行</span></span><br><span class="line">        <span class="built_in">dispatch_atomic_barrier</span>();</span><br><span class="line">        *val = ~<span class="number">0l</span>;</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">else</span> </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">do</span></span><br><span class="line">        &#123;</span><br><span class="line">            _dispatch_hardware_pause();</span><br><span class="line">        &#125; <span class="keyword">while</span> (*vval != ~<span class="number">0l</span>);</span><br><span class="line">        <span class="built_in">dispatch_atomic_barrier</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+参见dispatch_once源码，其核心函数dispatch_once_f源码分析：<br>某一个线程A首次进入dispatch_once_f，执行传入dispatch_once_f的block，然后调用dispatch_atomic_barrier；dispatch_atomic_barrier是一种内存屏障，串行化读写操作和解决顺序一致性问题，等屏障前的指令执行完了，屏障后的指令才能开始执行。<br>在首个线程A执行block的过程中，如果其它的线程也进入dispatch_once_f，执行方法就会走到else分支，调用_dispatch_hardware_pause，它干的事情就是延迟空等，这样做有助于提高性能和节省CPU耗电。<br>首个线程已经将block执行完毕，dispatch_atomic_barrier退出，这就保证了在dispatch_once_f的block的执行的唯一性，生成的单例也是唯一的。<br><strong>注:</strong><a href="https://blog.csdn.net/u014600626/article/details/102862777">dispatch_once的缺点</a></li>
+</ol>
+</li>
+<li>2.参数取地址的<a href="https://www.jianshu.com/p/bb0d47e0b26e">好处</a></li>
+</ul>
+<h5 id="3-5-NSCopying-NSMutableCopying"><a href="#3-5-NSCopying-NSMutableCopying" class="headerlink" title="3.5 NSCopying,NSMutableCopying"></a>3.5 NSCopying,NSMutableCopying</h5><p>这部分很简单详情见<a href="https://www.jianshu.com/p/e98e6e30ebda">链接</a></p>
+<h2 id="4-单例的优缺点"><a href="#4-单例的优缺点" class="headerlink" title="4.单例的优缺点"></a>4.单例的优缺点</h2><p>更多说明：<a href="https://www.jianshu.com/p/1aaa1256d641">参看链接</a> </p>
+<p><strong>优点 :</strong>  </p>
+<blockquote>
+<p>1、由于单例模式在内存中只有一个实例，减少了内存开支，特别是一个对象需要频繁地创建、销毁时，而且创建或销毁时性能又无法优化，单例模式的优势就非常明显。  </p>
+<p>2、由于单例模式只生成一个实例，所以减少了系统的性能开销，当一个对象的产生需要比较多的资源时，如读取配置、产生其他依赖对象时，则可以通过在应用启动时直接产生一个单例对象，然后用永久驻留内存的方式来解决；  </p>
+<p>3、单例模式可以避免对资源的多重占用，例如一个写文件动作，由于只有一个实例存在内存中，避免对同一个资源文件的同时写操作。  </p>
+<p>4、单例模式可以在系统设置全局的访问点，优化和共享资源访问，例如可以设计一个单例类，负责所有数据表的映射处理。 </p>
+</blockquote>
+<p><strong>缺点 :</strong></p>
+<blockquote>
+<p>1、单例模式一般没有接口，扩展很困难，若要扩展，除了修改代码基本上没有第二种途径可以实现。</p>
+<p>2、单例模式与单一职责原则有冲突。</p>
+</blockquote>
+<h2 id="5-总结"><a href="#5-总结" class="headerlink" title="5.总结"></a>5.总结</h2><p>除单一设计原则与允许可扩展需求外，单例设计在性能优化以及减少内存占用方面具有非常良好的表现。</p>
+<h4 id="参考资源"><a href="#参考资源" class="headerlink" title="参考资源"></a>参考资源</h4><ul>
+<li>static: <a href="https://www.jianshu.com/p/512b97c89297">https://www.jianshu.com/p/512b97c89297</a>  </li>
+<li>@synchronized：<a href="http://www.cocoachina.com/articles/18279">http://www.cocoachina.com/articles/18279</a></li>
+<li>多线程安全: <a href="https://www.jianshu.com/p/ef3f77c8b320">https://www.jianshu.com/p/ef3f77c8b320</a></li>
+<li>dispatch_once:<br>1.<a href="https://developer.apple.com/documentation/dispatch/1447169-dispatch_once?language=occ">https://developer.apple.com/documentation/dispatch/1447169-dispatch_once?language&#x3D;occ</a><br>2.<a href="https://opensource.apple.com/source/libdispatch/libdispatch-84.5/src/once.c.auto.html">https://opensource.apple.com/source/libdispatch/libdispatch-84.5/src/once.c.auto.html</a><br>3.<a href="http://lingyuncxb.com/2018/02/01/GCD%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%902%20%E2%80%94%E2%80%94%20dispatch-once%E7%AF%87/">http://lingyuncxb.com/2018/02/01/GCD%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%902%20%E2%80%94%E2%80%94%20dispatch-once%E7%AF%87/</a><br><a href="https://blog.csdn.net/u014600626/article/details/102862777">https://blog.csdn.net/u014600626/article/details/102862777</a></li>
+</ul>
+<ol start="4">
+<li>参数问题：<a href="https://www.jianshu.com/p/bb0d47e0b26e">https://www.jianshu.com/p/bb0d47e0b26e</a></li>
+<li>单例优劣：<a href="https://www.jianshu.com/p/1aaa1256d641">https://www.jianshu.com/p/1aaa1256d641</a></li>
+</ol>
+]]></content>
+      <categories>
+        <category>iOS</category>
+      </categories>
+      <tags>
+        <tag>iOS底层原理</tag>
+      </tags>
+  </entry>
 </search>
