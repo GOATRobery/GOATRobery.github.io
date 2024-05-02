@@ -154,6 +154,68 @@
       </tags>
   </entry>
   <entry>
+    <title>iOS应用内购买</title>
+    <url>/2024/04/30/iOS%E5%BA%94%E7%94%A8%E5%86%85%E8%B4%AD%E4%B9%B0/</url>
+    <content><![CDATA[<h3 id="Apple官方内购流程图"><a href="#Apple官方内购流程图" class="headerlink" title="Apple官方内购流程图:"></a>Apple官方内购流程图:</h3><p><img src="https://raw.githubusercontent.com/GOATRobery/common-Resources/main/images/apple_offical_in_app_purchase.webp" alt="Apple官方内购流程图"> </p>
+<ul>
+<li>1.程序向服务器发送请求，获得一份产品列表。</li>
+<li>2.服务器返回包含产品标识符的列表。</li>
+<li>3.程序向App Store发送请求，得到产品的信息。</li>
+<li>4.App Store返回产品信息。</li>
+<li>5.程序把返回的产品信息显示给用户（App的store界面）</li>
+<li>6.用户选择某个产品</li>
+<li>7.程序向App Store发送支付请求</li>
+<li>8.App Store处理支付请求并返回交易完成信息。</li>
+<li>9.程序从信息中获得数据，并发送至服务器。</li>
+<li>10.服务器纪录数据，并进行审(我们的)查。</li>
+<li>11.服务器将数据发给App Store来验证该交易的有效性。</li>
+<li>12.App Store对收到的数据进行解析，返回该数据和说明其是否有效的标识。</li>
+<li>13.服务器读取返回的数据，确定用户购买的内容。</li>
+<li>14.服务器将购买的内容传递给程序</li>
+</ul>
+<h3 id="内购商品一共有四种类型："><a href="#内购商品一共有四种类型：" class="headerlink" title="内购商品一共有四种类型："></a>内购商品一共有四种类型：</h3><h4 id="消耗型："><a href="#消耗型：" class="headerlink" title="消耗型："></a>消耗型：</h4><p>可以购买多次，多次结果累加，并且在App内作为“货币”消耗。典型的是虚拟货币，用户先通过IAP购买虚拟货币，再消耗虚拟货币购买商品。  </p>
+<h4 id="非消耗型："><a href="#非消耗型：" class="headerlink" title="非消耗型："></a>非消耗型：</h4><p>同一个Apple ID只能购买一次，可跨设备使用，业务场景较少。典型的是图书App中的一本电子书，或者游戏中的一个关卡。  </p>
+<h4 id="自动续期订阅："><a href="#自动续期订阅：" class="headerlink" title="自动续期订阅："></a>自动续期订阅：</h4><p>和时间相关的服务，在有效期内用户可享受服务，到期后自动扣费，退订需要到Apple ID的管理后台操作。典型的是连续包月的会员。自动续期订阅还可以加优惠活动。  </p>
+<h4 id="非续期订阅："><a href="#非续期订阅：" class="headerlink" title="非续期订阅："></a>非续期订阅：</h4><p>和时间相关的服务，但是不会自动扣费。  </p>
+<p>在新建了商品之后，这个商品ID是无法修改的。一个开发者账号内，一个商品ID只能使用一次，不能在当前开发者账号下的其他app内配置这个商品ID，如果删除后也不能重新添加这个商品ID。<br>同时，新建了商品后，这个商品的商品类型无法变更。所以需要谨慎选择商品ID和商品类型。</p>
+<h3 id="涉及API"><a href="#涉及API" class="headerlink" title="涉及API"></a>涉及API</h3><h4 id="内购"><a href="#内购" class="headerlink" title="内购"></a>内购</h4><ul>
+<li><strong>iOS15</strong>开始, 使用<strong>JSON Web Signature</strong> (JWS)作为交易验证签名的格式.  </li>
+<li>如果项目开发满足系统版本要求, 亦可用作<code>visionOS</code>的多场景<strong>API</strong>.</li>
+</ul>
+<h4 id="原内购"><a href="#原内购" class="headerlink" title="原内购"></a>原内购</h4><ul>
+<li>iOS3开始</li>
+</ul>
+<h3 id="IAP支付流程-服务器验证流程"><a href="#IAP支付流程-服务器验证流程" class="headerlink" title="IAP支付流程 &amp; 服务器验证流程"></a>IAP支付流程 &amp; 服务器验证流程</h3><p> 整个支付流程如下： </p>
+<ul>
+<li>1.客户端向Appstore请求购买产品（假设产品信息已经取得），Appstore验证产品成功后，从用户的Apple账户余额中扣费。   </li>
+<li>2.Appstore向客户端返回一段receipt-data，里面记录了本次交易的证书和签名信息。   </li>
+<li>3.客户端向我们可以信任的服务器提供receipt-data   </li>
+<li>4.服务器对receipt-data进行一次base64编码   </li>
+<li>5.服务器把编码后的receipt-data发往itunes.appstore进行验证   </li>
+<li>6.itunes.appstore返回验证结果给服务器   </li>
+<li>7.服务器对商品购买状态以及商品类型，向客户端发放相应的道具与推送数据更新通知</li>
+</ul>
+<h3 id="服务端开发"><a href="#服务端开发" class="headerlink" title="服务端开发"></a>服务端开发</h3><p>内购的过程，客户端开发工作量并不大，工作的重难点在于后端的设计和开发。</p>
+<h4 id="基于收据的校验模式"><a href="#基于收据的校验模式" class="headerlink" title="基于收据的校验模式"></a>基于收据的校验模式</h4><p>获取了收据之后我们可以继续验证收据是否合法。为了防止应用被黑，最好的方式是将校验逻辑放在后端来执行。相关的文档位于 <a href="https://developer.apple.com/documentation/storekit/in-app_purchase/original_api_for_in-app_purchase/validating_receipts_with_the_app_store?language=objc">《Validating receipts with the App Store》</a>.<br>验证收据的逻辑，这里提供 Python 和 Java 两套实现代码。可以在测试验证的时候使用 Python，开发服务器的时候使用 java 代码。接口信息位于文档 <a href="https://developer.apple.com/documentation/appstorereceipts/verifyreceipt">《verifyreceipt》</a>. 即通过 http 协议发送一个请求到服务器，将收据的信息做 base64 编码之后通过 post 的形式以 json 传递给 Apple 服务器。  </p>
+<figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">import requests, json</span><br><span class="line"></span><br><span class="line">receipt = <span class="string">&quot;你的收据&quot;</span></span><br><span class="line">url = <span class="string">&#x27;https://sandbox.itunes.apple.com/verifyReceipt&#x27;</span></span><br><span class="line">headers = &#123;<span class="string">&quot;Content-type&quot;</span>: <span class="string">&quot;application/json&quot;</span>&#125;</span><br><span class="line">data = json.dumps(&#123;<span class="string">&quot;receipt-data&quot;</span>: receipt&#125;)</span><br><span class="line">res = requests.post(<span class="attribute">url</span>=url, <span class="attribute">data</span>=data, <span class="attribute">headers</span>=headers, <span class="attribute">verify</span>=<span class="literal">False</span>).text</span><br><span class="line"><span class="built_in">print</span>(res)</span><br></pre></td></tr></table></figure>
+
+<p>以及 java 版（基于 OkHttp 进行网络请求）  </p>
+<figure class="highlight vbscript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> static void main(String...args) throws IOException &#123;  </span><br><span class="line"></span><br><span class="line">  String receipt = <span class="string">&quot;你的收据&quot;</span>;</span><br><span class="line">  JsonObject jsonObject = <span class="keyword">new</span> JsonObject();</span><br><span class="line">  jsonObject.addProperty(<span class="string">&quot;receipt-data&quot;</span>, receipt);  </span><br><span class="line">  </span><br><span class="line">  RequestBody body = RequestBody.create(MediaType.parse(<span class="string">&quot;application/json; charset=utf-8&quot;</span>), jsonObject.<span class="keyword">to</span><span class="built_in">String</span>());  </span><br><span class="line">  </span><br><span class="line">  <span class="built_in">Request</span> <span class="built_in">request</span> = <span class="keyword">new</span> <span class="built_in">Request</span>.Builder()</span><br><span class="line">          .header(<span class="string">&quot;Content-type&quot;</span>, <span class="string">&quot;application/json&quot;</span>)</span><br><span class="line">          .url(<span class="string">&quot;https://sandbox.itunes.apple.com/verifyReceipt&quot;</span>)</span><br><span class="line">          .post(body)</span><br><span class="line">          .build();</span><br><span class="line">  OkHttpClient client = <span class="keyword">new</span> OkHttpClient.Builder()</span><br><span class="line">          .build();</span><br><span class="line">  <span class="built_in">Response</span> <span class="built_in">response</span>;  </span><br><span class="line">  </span><br><span class="line">  try &#123;</span><br><span class="line">      <span class="built_in">response</span> = client.newCall(<span class="built_in">request</span>).<span class="keyword">execute</span>();  </span><br><span class="line">      </span><br><span class="line">      System.out.println(<span class="built_in">response</span>.body().<span class="built_in">string</span>());  </span><br><span class="line">      </span><br><span class="line">  &#125; catch (IOException e) &#123;  </span><br><span class="line">  </span><br><span class="line">      e.printStackTrace();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;  </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>输出的结果是一行 json，其中包含字段 status 为 0. 收据的详细字段说明可以参考文档 <a href="https://developer.apple.com/library/archive/releasenotes/General/ValidateAppStoreReceipt/Chapters/ReceiptFields.html#//apple_ref/doc/uid/TP40010573-CH106-SW8">《Receipt Validation Programming Guide》</a>.</p>
+<h3 id="Other"><a href="#Other" class="headerlink" title="Other"></a>Other</h3><p>StoreKit和StoreKit2</p>
+<p>三种状态: 新用户, 当前处于订阅, 过往存在订阅</p>
+<p>非续订订阅<br>自动续订订阅</p>
+<p>当用户订阅过期, 如果配置了计费宽限期, 最多可在60日内恢复订阅.</p>
+<h3 id="官方文档"><a href="#官方文档" class="headerlink" title="官方文档"></a>官方文档</h3><ul>
+<li><a href="https://developer.apple.com/cn/documentation/storekit/in-app_purchase/">https://developer.apple.com/cn/documentation/storekit/in-app_purchase&#x2F;</a> </li>
+<li><a href="https://developer.apple.com/documentation/storekit/in-app_purchase/choosing_a_storekit_api_for_in-app_purchases?language=objc">https://developer.apple.com/documentation/storekit/in-app_purchase&#x2F;choosing_a_storekit_api_for_in-app_purchases?language&#x3D;objc</a></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>iOS业务开发</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>dyld加载流程</title>
     <url>/2024/02/01/dyld%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B/</url>
     <content><![CDATA[<p>参考链接:<a href="https://developer.aliyun.com/article/924936?spm=a2c6h.24874632.expert-profile.43.393013000BVrBO">dyld加载流程分析</a></p>
