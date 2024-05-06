@@ -283,8 +283,42 @@
 <figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">import requests, json</span><br><span class="line"></span><br><span class="line">receipt = <span class="string">&quot;你的收据&quot;</span></span><br><span class="line">url = <span class="string">&#x27;https://sandbox.itunes.apple.com/verifyReceipt&#x27;</span></span><br><span class="line">headers = &#123;<span class="string">&quot;Content-type&quot;</span>: <span class="string">&quot;application/json&quot;</span>&#125;</span><br><span class="line">data = json.dumps(&#123;<span class="string">&quot;receipt-data&quot;</span>: receipt&#125;)</span><br><span class="line">res = requests.post(<span class="attribute">url</span>=url, <span class="attribute">data</span>=data, <span class="attribute">headers</span>=headers, <span class="attribute">verify</span>=<span class="literal">False</span>).text</span><br><span class="line"><span class="built_in">print</span>(res)</span><br></pre></td></tr></table></figure>
 
 <p>以及 java 版（基于 OkHttp 进行网络请求）  </p>
-<figure class="highlight vbscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> static void main(String...args) throws IOException &#123;  </span><br><span class="line"></span><br><span class="line">  String receipt = <span class="string">&quot;你的收据&quot;</span>;</span><br><span class="line">  JsonObject jsonObject = <span class="keyword">new</span> JsonObject();</span><br><span class="line">  jsonObject.addProperty(<span class="string">&quot;receipt-data&quot;</span>, receipt);  </span><br><span class="line">  </span><br><span class="line">  RequestBody body = RequestBody.create(MediaType.parse(<span class="string">&quot;application/json; charset=utf-8&quot;</span>), jsonObject.<span class="keyword">to</span><span class="built_in">String</span>());  </span><br><span class="line">  </span><br><span class="line">  <span class="built_in">Request</span> <span class="built_in">request</span> = <span class="keyword">new</span> <span class="built_in">Request</span>.Builder()</span><br><span class="line">          .header(<span class="string">&quot;Content-type&quot;</span>, <span class="string">&quot;application/json&quot;</span>)</span><br><span class="line">          .url(<span class="string">&quot;https://sandbox.itunes.apple.com/verifyReceipt&quot;</span>)</span><br><span class="line">          .post(body)</span><br><span class="line">          .build();</span><br><span class="line">  OkHttpClient client = <span class="keyword">new</span> OkHttpClient.Builder()</span><br><span class="line">          .build();</span><br><span class="line">  <span class="built_in">Response</span> <span class="built_in">response</span>;  </span><br><span class="line">  </span><br><span class="line">  try &#123;</span><br><span class="line">      <span class="built_in">response</span> = client.newCall(<span class="built_in">request</span>).<span class="keyword">execute</span>();  </span><br><span class="line">      </span><br><span class="line">      System.out.println(<span class="built_in">response</span>.body().<span class="built_in">string</span>());  </span><br><span class="line">      </span><br><span class="line">  &#125; catch (IOException e) &#123;  </span><br><span class="line">  </span><br><span class="line">      e.printStackTrace();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;  </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre><code>public static void main(String...args) throws IOException &#123;  
+
+  String receipt = &quot;你的收据&quot;;
+  JsonObject jsonObject = new JsonObject();
+  jsonObject.addProperty(&quot;receipt-data&quot;, receipt);  
+  
+  RequestBody body = RequestBody.create(MediaType.parse(&quot;application/json; charset=utf-8&quot;), jsonObject.toString());  
+  
+  Request request = new Request.Builder()
+          .header(&quot;Content-type&quot;, &quot;application/json&quot;)
+          .url(&quot;https://sandbox.itunes.apple.com/verifyReceipt&quot;)
+          .post(body)
+          .build();
+  OkHttpClient client = new OkHttpClient.Builder()
+          .build();
+  Response response;  
+  
+  try &#123;
+      response = client.newCall(request).execute();  
+      
+      System.out.println(response.body().string());  
+      
+  &#125; catch (IOException e) &#123;  
+  
+      e.printStackTrace();
+  &#125;
+&#125;  
+</code></pre>
 <p>输出的结果是一行 json，其中包含字段 status 为 0. 收据的详细字段说明可以参考文档 <a target="_blank" rel="noopener" href="https://developer.apple.com/library/archive/releasenotes/General/ValidateAppStoreReceipt/Chapters/ReceiptFields.html#//apple_ref/doc/uid/TP40010573-CH106-SW8">《Receipt Validation Programming Guide》</a>.</p>
+<h4 id="验证签名是否有无过期"><a href="#验证签名是否有无过期" class="headerlink" title="验证签名是否有无过期"></a>验证签名是否有无过期</h4><p>确保使用的<code>receipt_creation_date </code>字段中的数据来验证签名.</p>
+<h3 id="特别需要注意"><a href="#特别需要注意" class="headerlink" title="特别需要注意"></a>特别需要注意</h3><ul>
+<li>所有内购的功能在未发布到应用商店之前, 都只能使用沙盒测试.</li>
+<li>服务端以及iOS端, 都需要明确区分沙盒测试和线上实际使用的环境区分. 服务端使用对应的验证接口.</li>
+<li>签名时间与当前时间的验证, 当选取<code>东8区</code>时间作为参考时间.</li>
+<li>内购项目对应的服务字段,亦当服务端获取, 灵活调整相应价格.</li>
+</ul>
 <h3 id="Other"><a href="#Other" class="headerlink" title="Other"></a>Other</h3><p>StoreKit和StoreKit2</p>
 <p>三种状态: 新用户, 当前处于订阅, 过往存在订阅</p>
 <p>非续订订阅<br>自动续订订阅</p>
