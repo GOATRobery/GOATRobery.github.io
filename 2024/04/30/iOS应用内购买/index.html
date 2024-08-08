@@ -139,7 +139,21 @@
 &#125;  
 </code></pre>
 <p>输出的结果是一行 json，其中包含字段 status 为 0. 收据的详细字段说明可以参考文档 <a target="_blank" rel="noopener" href="https://developer.apple.com/library/archive/releasenotes/General/ValidateAppStoreReceipt/Chapters/ReceiptFields.html#//apple_ref/doc/uid/TP40010573-CH106-SW8">《Receipt Validation Programming Guide》</a>.</p>
-<h4 id="验证签名是否有无过期"><a href="#验证签名是否有无过期" class="headerlink" title="验证签名是否有无过期"></a>验证签名是否有无过期</h4><p>确保使用的<code>receipt_creation_date </code>字段中的数据来验证签名.</p>
+<h4 id="验证签名是否有无过期"><a href="#验证签名是否有无过期" class="headerlink" title="验证签名是否有无过期"></a>验证签名是否有无过期</h4><ul>
+<li><p>确保使用的<code>receipt_creation_date </code>字段中的数据来验证签名.</p>
+</li>
+<li><p>推荐使用SHA-256 和 SHA-1 算法.</p>
+</li>
+<li><p><code>latest_receipt</code>字段包含最新的收据信息.</p>
+</li>
+<li><p><code>latest_receipt_info</code>字段包含初始购买和后续续订.</p>
+</li>
+<li><p><code>expiration_intent </code>字段获取过期原因.</p>
+</li>
+<li></li>
+<li><p>使用IDFV签名下的UUID&#x2F;uuid</p>
+</li>
+</ul>
 <h3 id="特别需要注意"><a href="#特别需要注意" class="headerlink" title="特别需要注意"></a>特别需要注意</h3><ul>
 <li>所有内购的功能在未发布到应用商店之前, 都只能使用沙盒测试.</li>
 <li>服务端以及iOS端, 都需要明确区分沙盒测试和线上实际使用的环境区分. 服务端使用对应的验证接口.</li>

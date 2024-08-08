@@ -101,6 +101,8 @@
 <li>静态库，先解析<code>linkmap</code>数据，计算出<code>Pod模块</code>代码大小，解析<code>Pods-targetName-resource.sh</code>的资源拷贝代码，计算出拷贝到<code>Pod模块</code>的资源大小。 </li>
 <li>动态库，先使用<code>lipo</code>拆分动态库的二进制文件，计算出单架构的代码大小，然后再计算动态库<code>framework</code>内的资源文件，得到动态库的资源文件大小。</li>
 </ul>
+<p>在此需要注意的是, 早期一些文章所述分离库文件中不需要的架构, 其实质上减少的是在打包过程中的包大小, 而最终<strong>AppStore</strong>的压缩包或者解压缩安装包的大小并不受影响, 关键在于<strong>Apple的Slicing</strong>自动拆分架构以适应当前用户设备可支持的架构, 故而并不需要我们额外处理.  </p>
+<p>分拆库文件架构也并非没有收益, 其最终可以减少上传到<strong>TestFlight</strong>或者<strong>ADHoc</strong>等内测阶段的安装包体积, 加快<strong>Archive</strong>打包速度. 我们可以使用<code>lipo</code>命令对目标库文件进行拆分架构, 也可以<a target="_blank" rel="noopener" href="https://github.com/GOATRobery/Utility-Script-/blob/main/libThin.sh">使用脚本</a>简化这步流程加快效率.</p>
 <h3 id="2-1-库Symbol"><a href="#2-1-库Symbol" class="headerlink" title="2.1 库Symbol"></a>2.1 库Symbol</h3><p><code>Strip Style</code>表示的是我们需要去除的符号的类型的选项，其分为三个选择项： </p>
 <ul>
 <li><code>All Symbols</code>: 去除所有符号，一般是在主工程中开启。</li>
@@ -182,6 +184,7 @@
 <p><strong>编译配置优化:</strong><br><img src="https://raw.githubusercontent.com/GOATRobery/common-Resources/main/images/zoom-in-crop-mark_1512_0_0_0.webp" alt="编译配置优化"></p>
 <h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
 <li><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/xcode/build-settings-reference/">Xcode配置说明官方文档</a>  </li>
+<li><a target="_blank" rel="noopener" href="https://help.apple.com/xcode/mac/11.4/#/itcaec37c2a6?sub=dev881878d77">Xcode配置参数说明</a></li>
 <li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/I6DH5RvkMh_-bxGpkAKBPA">Alibaba安装包瘦身(精华)</a></li>
 <li><a target="_blank" rel="noopener" href="https://blog.csdn.net/ByteDanceTech/article/details/112504772">抖音品质建设 - iOS 安装包大小优化实践篇</a></li>
 <li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/516628980">搜狐技术,iOS包体积优化</a></li>

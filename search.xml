@@ -48,6 +48,8 @@
 <li>静态库，先解析<code>linkmap</code>数据，计算出<code>Pod模块</code>代码大小，解析<code>Pods-targetName-resource.sh</code>的资源拷贝代码，计算出拷贝到<code>Pod模块</code>的资源大小。 </li>
 <li>动态库，先使用<code>lipo</code>拆分动态库的二进制文件，计算出单架构的代码大小，然后再计算动态库<code>framework</code>内的资源文件，得到动态库的资源文件大小。</li>
 </ul>
+<p>在此需要注意的是, 早期一些文章所述分离库文件中不需要的架构, 其实质上减少的是在打包过程中的包大小, 而最终<strong>AppStore</strong>的压缩包或者解压缩安装包的大小并不受影响, 关键在于<strong>Apple的Slicing</strong>自动拆分架构以适应当前用户设备可支持的架构, 故而并不需要我们额外处理.  </p>
+<p>分拆库文件架构也并非没有收益, 其最终可以减少上传到<strong>TestFlight</strong>或者<strong>ADHoc</strong>等内测阶段的安装包体积, 加快<strong>Archive</strong>打包速度. 我们可以使用<code>lipo</code>命令对目标库文件进行拆分架构, 也可以<a href="https://github.com/GOATRobery/Utility-Script-/blob/main/libThin.sh">使用脚本</a>简化这步流程加快效率.</p>
 <h3 id="2-1-库Symbol"><a href="#2-1-库Symbol" class="headerlink" title="2.1 库Symbol"></a>2.1 库Symbol</h3><p><code>Strip Style</code>表示的是我们需要去除的符号的类型的选项，其分为三个选择项： </p>
 <ul>
 <li><code>All Symbols</code>: 去除所有符号，一般是在主工程中开启。</li>
@@ -129,6 +131,7 @@
 <p><strong>编译配置优化:</strong><br><img src="https://raw.githubusercontent.com/GOATRobery/common-Resources/main/images/zoom-in-crop-mark_1512_0_0_0.webp" alt="编译配置优化"></p>
 <h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
 <li><a href="https://developer.apple.com/documentation/xcode/build-settings-reference/">Xcode配置说明官方文档</a>  </li>
+<li><a href="https://help.apple.com/xcode/mac/11.4/#/itcaec37c2a6?sub=dev881878d77">Xcode配置参数说明</a></li>
 <li><a href="https://mp.weixin.qq.com/s/I6DH5RvkMh_-bxGpkAKBPA">Alibaba安装包瘦身(精华)</a></li>
 <li><a href="https://blog.csdn.net/ByteDanceTech/article/details/112504772">抖音品质建设 - iOS 安装包大小优化实践篇</a></li>
 <li><a href="https://zhuanlan.zhihu.com/p/516628980">搜狐技术,iOS包体积优化</a></li>
@@ -229,7 +232,21 @@
 &#125;  
 </code></pre>
 <p>输出的结果是一行 json，其中包含字段 status 为 0. 收据的详细字段说明可以参考文档 <a href="https://developer.apple.com/library/archive/releasenotes/General/ValidateAppStoreReceipt/Chapters/ReceiptFields.html#//apple_ref/doc/uid/TP40010573-CH106-SW8">《Receipt Validation Programming Guide》</a>.</p>
-<h4 id="验证签名是否有无过期"><a href="#验证签名是否有无过期" class="headerlink" title="验证签名是否有无过期"></a>验证签名是否有无过期</h4><p>确保使用的<code>receipt_creation_date </code>字段中的数据来验证签名.</p>
+<h4 id="验证签名是否有无过期"><a href="#验证签名是否有无过期" class="headerlink" title="验证签名是否有无过期"></a>验证签名是否有无过期</h4><ul>
+<li><p>确保使用的<code>receipt_creation_date </code>字段中的数据来验证签名.</p>
+</li>
+<li><p>推荐使用SHA-256 和 SHA-1 算法.</p>
+</li>
+<li><p><code>latest_receipt</code>字段包含最新的收据信息.</p>
+</li>
+<li><p><code>latest_receipt_info</code>字段包含初始购买和后续续订.</p>
+</li>
+<li><p><code>expiration_intent </code>字段获取过期原因.</p>
+</li>
+<li></li>
+<li><p>使用IDFV签名下的UUID&#x2F;uuid</p>
+</li>
+</ul>
 <h3 id="特别需要注意"><a href="#特别需要注意" class="headerlink" title="特别需要注意"></a>特别需要注意</h3><ul>
 <li>所有内购的功能在未发布到应用商店之前, 都只能使用沙盒测试.</li>
 <li>服务端以及iOS端, 都需要明确区分沙盒测试和线上实际使用的环境区分. 服务端使用对应的验证接口.</li>
