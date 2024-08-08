@@ -59,96 +59,114 @@
 <p><code>Strip Linked Product</code>:<br><code>Xcode</code> 提供给我们 <code>Strip Linked Product</code> 来去除不需要的符号信息(<code>Strip Style</code> 中选择的选项相应的符号)，去除了符号信息之后我们就只能使用 <code>dSYM</code> 来进行符号化了，所以需要将 <code>Debug Information Format</code> 修改为 <code>DWARF with dSYM file</code>。</p>
 <p><code>Strip Debug Symbols During Copy</code>:<br><code>Strip Linked Product</code> 类似，但是这个是将那些拷贝进项目包的三方库、资源或者 Extension 的 <code>Debug Symbol</code> 去除掉，同样也是使用的 <code>strip</code> 命令。这个选项没有前置条件，所以我们只需要在 <code>Release</code> 模式下开启，不然就不能对三方库进行断点调试和符号化了。</p>
 <p><code>Cocoapods</code> 管理的动态库(<code>use_framework!</code>)的情况就相对要特殊一点，因为 <code>Cocoapods</code> 中的<code>动态库</code>是使用自己实现的脚本 <code>Pods-xxx-frameworks.sh</code> 来实现拷贝的，所以并不会走 <code>Xcode</code> 的流程，当然也就不受 <code>Strip Debug Symbols During Copy</code> 的影响。当然<code>Cocoapods</code> 是源码管理的，所以只需要将源码<code>Target 中的 Strip Linked Product</code> 设置为 <code>YES</code> 即可。 </p>
-<p>可以通过如下设置, 配置<code>pod</code>的<code>config</code>, 保证每次<code>pod</code>更新库配置都可以保持一致。</p>
-<figure class="highlight lua"><table><tr><td class="code"><pre><span class="line">post_install <span class="keyword">do</span> |installer|</span><br><span class="line">    installer.pods_project.targets.each <span class="keyword">do</span> |target|</span><br><span class="line">        target.build_configurations.each <span class="keyword">do</span> |<span class="built_in">config</span>|</span><br><span class="line">            <span class="built_in">config</span>.build_settings[<span class="string">&#x27;ENABLE_BITCODE&#x27;</span>] = <span class="string">&#x27;NO&#x27;</span></span><br><span class="line">            <span class="built_in">config</span>.build_settings[<span class="string">&#x27;STRIP_INSTALLED_PRODUCT&#x27;</span>] = <span class="string">&#x27;YES&#x27;</span></span><br><span class="line">            <span class="built_in">config</span>.build_settings[<span class="string">&#x27;SWIFT_COMPILATION_MODE&#x27;</span>] = <span class="string">&#x27;wholemodule&#x27;</span></span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">config</span>.name == <span class="string">&#x27;Debug&#x27;</span></span><br><span class="line">                <span class="built_in">config</span>.build_settings[<span class="string">&#x27;SWIFT_OPTIMIZATION_LEVEL&#x27;</span>] = <span class="string">&#x27;-Onone&#x27;</span></span><br><span class="line">                <span class="built_in">config</span>.build_settings[<span class="string">&#x27;GCC_OPTIMIZATION_LEVEL&#x27;</span>] = <span class="string">&#x27;0&#x27;</span></span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                <span class="built_in">config</span>.build_settings[<span class="string">&#x27;SWIFT_OPTIMIZATION_LEVEL&#x27;</span>] = <span class="string">&#x27;-Osize&#x27;</span></span><br><span class="line">                <span class="built_in">config</span>.build_settings[<span class="string">&#x27;GCC_OPTIMIZATION_LEVEL&#x27;</span>] = <span class="string">&#x27;s&#x27;</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    endend</span><br></pre></td></tr></table></figure>
+<p>可以通过如下设置, 配置<code>pod</code>的<code>config</code>, 保证每次<code>pod</code>更新库配置都可以保持一致。 </p>
+<p><strong>示例1</strong></p>
+<figure class="highlight lua"><table><tr><td class="code"><pre><span class="line">post_install <span class="keyword">do</span> |installer|</span><br><span class="line">    installer.pods_project.targets.each <span class="keyword">do</span> |target|</span><br><span class="line">        target.build_configurations.each <span class="keyword">do</span> |<span class="built_in">config</span>|</span><br><span class="line">            <span class="built_in">config</span>.build_settings[<span class="string">&#x27;ENABLE_BITCODE&#x27;</span>] = <span class="string">&#x27;NO&#x27;</span></span><br><span class="line">            <span class="built_in">config</span>.build_settings[<span class="string">&#x27;STRIP_INSTALLED_PRODUCT&#x27;</span>] = <span class="string">&#x27;YES&#x27;</span></span><br><span class="line">            <span class="built_in">config</span>.build_settings[<span class="string">&#x27;SWIFT_COMPILATION_MODE&#x27;</span>] = <span class="string">&#x27;wholemodule&#x27;</span></span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">config</span>.name == <span class="string">&#x27;Debug&#x27;</span></span><br><span class="line">                <span class="built_in">config</span>.build_settings[<span class="string">&#x27;SWIFT_OPTIMIZATION_LEVEL&#x27;</span>] = <span class="string">&#x27;-Onone&#x27;</span></span><br><span class="line">                <span class="built_in">config</span>.build_settings[<span class="string">&#x27;GCC_OPTIMIZATION_LEVEL&#x27;</span>] = <span class="string">&#x27;0&#x27;</span></span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                <span class="built_in">config</span>.build_settings[<span class="string">&#x27;SWIFT_OPTIMIZATION_LEVEL&#x27;</span>] = <span class="string">&#x27;-Osize&#x27;</span></span><br><span class="line">                <span class="built_in">config</span>.build_settings[<span class="string">&#x27;GCC_OPTIMIZATION_LEVEL&#x27;</span>] = <span class="string">&#x27;s&#x27;</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    endend</span><br><span class="line">```  </span><br><span class="line">**示例<span class="number">2</span>**</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>target ‘RTImageX’ do</p>
+<h1 id="Comment-the-next-line-if-you-don’t-want-to-use-dynamic-frameworks"><a href="#Comment-the-next-line-if-you-don’t-want-to-use-dynamic-frameworks" class="headerlink" title="Comment the next line if you don’t want to use dynamic frameworks"></a>Comment the next line if you don’t want to use dynamic frameworks</h1><p>  use_frameworks!</p>
+<h1 id="Pods-for-RTImageX"><a href="#Pods-for-RTImageX" class="headerlink" title="Pods for RTImageX"></a>Pods for RTImageX</h1><p>  pod ‘SDWebImage’<br>  pod ‘AFNetworking’<br>  pod ‘Alamofire’</p>
+<h1 id="pod-‘Kingfisher’"><a href="#pod-‘Kingfisher’" class="headerlink" title="pod ‘Kingfisher’"></a>pod ‘Kingfisher’</h1><p>  pod ‘LookinServer’, :configurations &#x3D;&gt; [‘Debug’]<br>end</p>
+<p>$static_framework &#x3D; [‘SDWebImage’, ‘AFNetworking’]</p>
+<p>pre_install do |install|<br>  puts install<br>  install.pod_targets.each {| pod |<br>    if $static_framework.include?(pod.name)<br>      def pod.build_type;<br>        Pod::BuildType.static_framework # 使用静态库<br>      end<br>    end<br>  }<br>end  </p>
+<figure class="highlight autohotkey"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="title">**补充:</span>** </span><br><span class="line">设置 `STRIP_STYLE= all` 来裁剪所有符号。但通过：</span><br><span class="line"></span><br><span class="line">&gt; objdump -exports-trie /path/to/MyApp.app/MyApp </span><br><span class="line"></span><br><span class="line">还能获取到可执行文件中的符号，这部分可以通过设置 `EXPORTED_SYMBOLS_FILE` 为一个空文件解决 `EXPORTED_SYMBOLS_FILE=/path/to/emptyfile.txt` 。</span><br><span class="line"></span><br><span class="line">对于自己构建的动态库。只需要保留未定义的符号以及全局的符号其他的都可以去除。通常设置`STRIP_STYLE=non-global`。</span><br><span class="line"></span><br><span class="line">### <span class="number">3</span>. LOT优化 </span><br><span class="line"><span class="title">**开启LTO优化配置:</span>**  </span><br><span class="line">链接期优化参数：`LLVM`提供链接期编译优化, 通过设置工程中的`Link-Time Optimization `进行控制。</span><br><span class="line">提供以下几个选项： </span><br><span class="line"></span><br><span class="line">- `No` 不开启链接期优化<span class="comment">;  </span></span><br><span class="line"><span class="title">- `Fastest[-O3]`:</span> 在开启`Fast[-O1]`项支持的所有优化项的同时，开启函数内联和寄存器重命名选项。这个设置有可能会导致二进制文件变大。</span><br><span class="line"><span class="title">- `Fastest, Smallest[-Os]`:</span> 优化大小。这个设置开启了`Fast[-O1]`项中的所有不增加代码大小的优化选项，并会进一步的执行可以减小代码大小的优化。</span><br><span class="line"><span class="title">- `Fastest, Aggressive Optimizations[-Ofast]`:</span> 这个设置开启了`Fastest[-O3]`中的所有优化选项，同时也开启了可能会打破严格编译标准的积极优化，但并不会影响运行良好的代码。</span><br><span class="line"><span class="title">- `Smallest, Aggressive Size Optimizations [-Oz]`:</span> 与相似`-Os`，但会进一步减小代码大小，并且可能需要更长的时间才能运行。</span><br><span class="line"></span><br><span class="line"><span class="title">**Release模式下采用最高优化等级:</span>**</span><br><span class="line">`Build Settings-Optimization Level`在`Release`模式下设置为`[-Oz]`, 该设置通过将重复的代码模式隔离到编译器生成的函数中来实现额外的尺寸, 最大程度的优化生成的包体积,</span><br><span class="line"><span class="title">更多信息请参考[官方文档链接](https:</span>//help.apple.com/xcode/mac/<span class="number">11.4</span>/#/itcaec37c2a6)。</span><br><span class="line"></span><br><span class="line">### <span class="number">4</span>. 死代码剥离(`Dead Code Strip`) </span><br><span class="line"><span class="title">**官方描述:</span>**</span><br><span class="line">`Activating this setting causes the -dead_strip flag to be </span><br><span class="line"> passed to ld(<span class="number">1</span>) via cc(<span class="number">1</span>) to turn on dead code stripping.`</span><br><span class="line"> </span><br><span class="line">**Xcode默认开启选项：**`Xcode`在默认情况下会开启移除未使用代码的选项。这意味着在编译过程中，编译器会尽可能地移除未被使用的代码，以减少生成的可执行文件的大小和提高性能。 </span><br><span class="line"> </span><br><span class="line">**C/C++/Swift等静态语言**：这些编译器在链接阶段会移除未使用的代码。静态语言的特性使得编译器在链接时能够准确地确定哪些代码被使用，因此可以安全地删除未使用的部分。 </span><br><span class="line"></span><br><span class="line">**Objective-C等动态语言**：与静态语言不同，Objective-C等动态语言是建立在运行时上的。在Objective-C中，对象的创建和方法的调用等操作发生在运行时。因此，底层暴露给编译器的是Runtime源码的编译结果，这使得编译器无法在编译时准确地确定哪些代码会被使用。因此，对于**Objective-C等动态语言，移除未使用代码的操作通常是无效的，因为在运行时才能确定代码的有效性**。</span><br><span class="line"></span><br><span class="line">### <span class="number">5</span>. OC、C/C++Exception剥离</span><br><span class="line"><span class="title">**异常捕获机制:</span>**</span><br><span class="line">`Enable C++ Exceptions`和`Enable Objective-C Exceptions`是指项目对错误的异常处理，比如`try catch`， `throw`之类的语句；所以如果你的项目中有类似的处理，关闭这个之后会报错`Cannot use &#x27;@try&#x27; with Objective-C exceptions disabled`。如果宏定义有`try`，关闭之后也会报错。</span><br><span class="line"></span><br><span class="line">如果你的项目中可以设置关闭捕获异常的开关，还需要另外设置`Build Settings-Other Link Flags`去添加一个字段`-fno-exceptions`代表禁用异常机制。 </span><br><span class="line"></span><br><span class="line">OC的该选项, 因为有一些诸如`@weak`等操作的存在, 去除之后编译则会报错, 若项目有如同样操作, 不建议去除。</span><br><span class="line"></span><br><span class="line">### <span class="number">6</span>. 重复代码 </span><br><span class="line">### <span class="number">6.1</span> 静态分析重复/无用代码</span><br><span class="line"><span class="title">**AppCode/fui等工具,基于源码扫描:</span>**</span><br><span class="line">基于脚本做正则匹配, 误判概率很高, 如果是小型项目使用AppCode则完全足够了。动态化逻辑比较多的项目不推荐.</span><br><span class="line"></span><br><span class="line"><span class="title">**Mach-O信息分析:</span>**</span><br><span class="line">`__DATA __objc_classrefs` 段记录了引用类的地址，`__DATA __objc_classlist`段记录了所有类的地址，取差集可以得到未使用的类的地址，然后进行符号化，就可以得到未被引用的类信息。</span><br><span class="line"><span class="title">[详情请参考:https://zhuanlan.zhihu.com/p/344821756](https:</span>//zhuanlan.zhihu.com/p/<span class="number">344821756</span>)</span><br><span class="line"></span><br><span class="line"><span class="title">**Clang插件扫描:</span>**</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### <span class="number">6.2</span> 动态分析重复/无用代码</span><br><span class="line">C/C++/Swift等静态语言, 在编译时即可确定代码的调用关系, 但是如**Objective-C**动态语言, 则只可在运行时确定代码的调用关系. 以上静态分析的方式存在一定的局限性, 需要我们作出更多努力. </span><br><span class="line"><span class="title">**基于Runtime的metaclass初始化位标记:</span>**  </span><br><span class="line"><span class="title">程序启动时, 因为[`dyld`处理逻辑](https:</span>//developer.aliyun.com/article/<span class="number">924936</span>?spm=a2c6h.<span class="number">24874632</span>.expert-profile.<span class="number">43.393013000</span>BVrBO)的关系, 在**Process-in**会**load**所有类以及分类并主动调用他们的**load()**方法. 正是如此, 我们参考 **load()**方法的执行与否并不能确定一个类是否真正使用到了.</span><br><span class="line"><span class="title">同**load()**方法类似的**initialize()**方法, 亦是类在首次真正使用时调用该方法, 并且**Class**结构中**metaClass**有一个**flag**标记位可以用来显示**initialize**的调用状态, 该**flag**标记位为[**RW_INITIALIZED**](https:</span>//github.com/apple-oss-distributions/objc4/blob/main/runtime/objc-runtime-<span class="keyword">new</span>.h)时则表明该类已经被真正调用.</span><br><span class="line"></span><br><span class="line"><span class="title">**基于GCOV/LLVM Profile的二进制插桩:</span>** </span><br><span class="line"><span class="title">[增量代码覆盖率监控](https:</span>//tech.meituan.com/<span class="number">2018</span>/<span class="number">12</span>/<span class="number">27</span>/ios-increment-coverage.html)</span><br><span class="line"></span><br><span class="line">### <span class="number">7</span>. Asset.car图片压缩空间配置 </span><br><span class="line">设置`Build Settings-Asset Catalog Compiler Options-Optimization设置为space；`</span><br><span class="line">可以改变actool在构建Assets.car时选取的编码压缩算法。  </span><br><span class="line"></span><br><span class="line"><span class="title">使用如下命令,可以把对应信息生成.json文件，用于对比不同:</span> </span><br><span class="line">`xcrun --sdk iphoneos assetutil --info Assets.car &gt; Assets.json`</span><br><span class="line"></span><br><span class="line">### <span class="number">8</span>. _TEXT段加密绕过(`iOS12及以前`) </span><br><span class="line">### <span class="number">8.1</span> `__TEXT` 段迁移 </span><br><span class="line">`Apple`官方会将**Mach-O**的`__TEXT`段进行[Fairplay](https://tech.meituan.com/<span class="number">2021</span>/<span class="number">11</span>/<span class="number">25</span>/fairplay-drm.html)加密, 这个加密方式可能会对安装包的压缩比例产生影响, 从而影响到最终压缩包的大小. </span><br><span class="line"></span><br><span class="line">如果我们可以把`__TEXT`段中一些不必要的内容转移走, 规避掉加密行为, 那么我们在`__TEXT`段上的压缩有所收益.  </span><br><span class="line"></span><br><span class="line"><span class="title">在此需要注意的是, [`__TEXT`段迁移](https:</span>//juejin.cn/post/<span class="number">6911121493573402638</span>#heading-<span class="number">17</span>)降低的是下载的大小, 即下载压缩包的大小, `App Store`上显示的包大小, 即解压缩后实际安装大小则变化不明显.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>-Wl,-rename_section,__TEXT,__cstring,__RODATA,__cstring<br>-Wl,-rename_section,__TEXT,__objc_methname,__RODATA,__objc_methname<br>-Wl,-rename_section,__TEXT,__objc_classname,__RODATA,__objc_classname<br>-Wl,-rename_section,__TEXT,__objc_methtype,__RODATA,__objc_methtype<br>-Wl,-rename_section,__TEXT,__gcc_except_tab,__RODATA,__gcc_except_tab<br>-Wl,-rename_section,__TEXT,__const,__RODATA,__const<br>-Wl,-rename_section,__TEXT,__dof_RACCompou,__RODATA,__dof_RACCompou<br>-Wl,-rename_section,__TEXT,__dof_RACSignal,__RODATA,__dof_RACSignal<br>-Wl,-rename_section,__TEXT,__text,__WB_TEXT,__text<br>-Wl,-rename_section,__TEXT,__stubs,__WB_TEXT,__stubs<br>-Wl,-rename_section,__TEXT,__textcoal_nt,__WB_TEXT,__text,<br>-Wl,-rename_section,__TEXT,__StaticInit,__WB_TEXT,__text<br>-Wl,-segprot,__WB_TEXT,rx,rx</p>
+<pre><code>迁移过后`Mac-O`中`LoadCommand`结构: 
+![LC_TEXT](https://github.com/GOATRobery/common-Resources/blob/main/images/rename_section_TEXT.jpg?raw=true) 
 
-<p><strong>补充:</strong><br>设置 <code>STRIP_STYLE= all</code> 来裁剪所有符号。但通过：</p>
-<blockquote>
-<p>objdump -exports-trie &#x2F;path&#x2F;to&#x2F;MyApp.app&#x2F;MyApp </p>
-</blockquote>
-<p>还能获取到可执行文件中的符号，这部分可以通过设置 <code>EXPORTED_SYMBOLS_FILE</code> 为一个空文件解决 <code>EXPORTED_SYMBOLS_FILE=/path/to/emptyfile.txt</code> 。</p>
-<p>对于自己构建的动态库。只需要保留未定义的符号以及全局的符号其他的都可以去除。通常设置<code>STRIP_STYLE=non-global</code>。</p>
-<h3 id="3-LOT优化"><a href="#3-LOT优化" class="headerlink" title="3. LOT优化"></a>3. LOT优化</h3><p><strong>开启LTO优化配置:</strong><br>链接期优化参数：<code>LLVM</code>提供链接期编译优化, 通过设置工程中的<code>Link-Time Optimization </code>进行控制。<br>提供以下几个选项： </p>
-<ul>
-<li><code>No</code> 不开启链接期优化;  </li>
-<li><code>Fastest[-O3]</code>: 在开启<code>Fast[-O1]</code>项支持的所有优化项的同时，开启函数内联和寄存器重命名选项。这个设置有可能会导致二进制文件变大。</li>
-<li><code>Fastest, Smallest[-Os]</code>: 优化大小。这个设置开启了<code>Fast[-O1]</code>项中的所有不增加代码大小的优化选项，并会进一步的执行可以减小代码大小的优化。</li>
-<li><code>Fastest, Aggressive Optimizations[-Ofast]</code>: 这个设置开启了<code>Fastest[-O3]</code>中的所有优化选项，同时也开启了可能会打破严格编译标准的积极优化，但并不会影响运行良好的代码。</li>
-<li><code>Smallest, Aggressive Size Optimizations [-Oz]</code>: 与相似<code>-Os</code>，但会进一步减小代码大小，并且可能需要更长的时间才能运行。</li>
-</ul>
-<p><strong>Release模式下采用最高优化等级:</strong><br><code>Build Settings-Optimization Level</code>在<code>Release</code>模式下设置为<code>[-Oz]</code>, 该设置通过将重复的代码模式隔离到编译器生成的函数中来实现额外的尺寸, 最大程度的优化生成的包体积,<br>更多信息请参考<a href="https://help.apple.com/xcode/mac/11.4/#/itcaec37c2a6">官方文档链接</a>。</p>
-<h3 id="4-死代码剥离-Dead-Code-Strip"><a href="#4-死代码剥离-Dead-Code-Strip" class="headerlink" title="4. 死代码剥离(Dead Code Strip)"></a>4. 死代码剥离(<code>Dead Code Strip</code>)</h3><p><strong>官方描述:</strong><br><code>Activating this setting causes the -dead_strip flag to be   passed to ld(1) via cc(1) to turn on dead code stripping.</code></p>
-<p><strong>Xcode默认开启选项：</strong><code>Xcode</code>在默认情况下会开启移除未使用代码的选项。这意味着在编译过程中，编译器会尽可能地移除未被使用的代码，以减少生成的可执行文件的大小和提高性能。 </p>
-<p><strong>C&#x2F;C++&#x2F;Swift等静态语言</strong>：这些编译器在链接阶段会移除未使用的代码。静态语言的特性使得编译器在链接时能够准确地确定哪些代码被使用，因此可以安全地删除未使用的部分。 </p>
-<p><strong>Objective-C等动态语言</strong>：与静态语言不同，Objective-C等动态语言是建立在运行时上的。在Objective-C中，对象的创建和方法的调用等操作发生在运行时。因此，底层暴露给编译器的是Runtime源码的编译结果，这使得编译器无法在编译时准确地确定哪些代码会被使用。因此，对于<strong>Objective-C等动态语言，移除未使用代码的操作通常是无效的，因为在运行时才能确定代码的有效性</strong>。</p>
-<h3 id="5-OC、C-C-Exception剥离"><a href="#5-OC、C-C-Exception剥离" class="headerlink" title="5. OC、C&#x2F;C++Exception剥离"></a>5. OC、C&#x2F;C++Exception剥离</h3><p><strong>异常捕获机制:</strong><br><code>Enable C++ Exceptions</code>和<code>Enable Objective-C Exceptions</code>是指项目对错误的异常处理，比如<code>try catch</code>， <code>throw</code>之类的语句；所以如果你的项目中有类似的处理，关闭这个之后会报错<code>Cannot use &#39;@try&#39; with Objective-C exceptions disabled</code>。如果宏定义有<code>try</code>，关闭之后也会报错。</p>
-<p>如果你的项目中可以设置关闭捕获异常的开关，还需要另外设置<code>Build Settings-Other Link Flags</code>去添加一个字段<code>-fno-exceptions</code>代表禁用异常机制。 </p>
-<p>OC的该选项, 因为有一些诸如<code>@weak</code>等操作的存在, 去除之后编译则会报错, 若项目有如同样操作, 不建议去除。</p>
-<h3 id="6-重复代码"><a href="#6-重复代码" class="headerlink" title="6. 重复代码"></a>6. 重复代码</h3><h3 id="6-1-静态分析重复-无用代码"><a href="#6-1-静态分析重复-无用代码" class="headerlink" title="6.1 静态分析重复&#x2F;无用代码"></a>6.1 静态分析重复&#x2F;无用代码</h3><p><strong>AppCode&#x2F;fui等工具,基于源码扫描:</strong><br>基于脚本做正则匹配, 误判概率很高, 如果是小型项目使用AppCode则完全足够了。动态化逻辑比较多的项目不推荐.</p>
-<p><strong>Mach-O信息分析:</strong><br><code>__DATA __objc_classrefs</code> 段记录了引用类的地址，<code>__DATA __objc_classlist</code>段记录了所有类的地址，取差集可以得到未使用的类的地址，然后进行符号化，就可以得到未被引用的类信息。<br><a href="https://zhuanlan.zhihu.com/p/344821756">详情请参考:https://zhuanlan.zhihu.com/p/344821756</a></p>
-<p><strong>Clang插件扫描:</strong></p>
-<h3 id="6-2-动态分析重复-无用代码"><a href="#6-2-动态分析重复-无用代码" class="headerlink" title="6.2 动态分析重复&#x2F;无用代码"></a>6.2 动态分析重复&#x2F;无用代码</h3><p>C&#x2F;C++&#x2F;Swift等静态语言, 在编译时即可确定代码的调用关系, 但是如<strong>Objective-C</strong>动态语言, 则只可在运行时确定代码的调用关系. 以上静态分析的方式存在一定的局限性, 需要我们作出更多努力.<br><strong>基于Runtime的metaclass初始化位标记:</strong><br>程序启动时, 因为<a href="https://developer.aliyun.com/article/924936?spm=a2c6h.24874632.expert-profile.43.393013000BVrBO"><code>dyld</code>处理逻辑</a>的关系, 在<strong>Process-in</strong>会<strong>load</strong>所有类以及分类并主动调用他们的<strong>load()<strong>方法. 正是如此, 我们参考 <strong>load()<strong>方法的执行与否并不能确定一个类是否真正使用到了.<br>同</strong>load()<strong>方法类似的</strong>initialize()<strong>方法, 亦是类在首次真正使用时调用该方法, 并且</strong>Class</strong>结构中</strong>metaClass</strong>有一个<strong>flag</strong>标记位可以用来显示<strong>initialize</strong>的调用状态, 该<strong>flag</strong>标记位为<a href="https://github.com/apple-oss-distributions/objc4/blob/main/runtime/objc-runtime-new.h"><strong>RW_INITIALIZED</strong></a>时则表明该类已经被真正调用.</p>
-<p><strong>基于GCOV&#x2F;LLVM Profile的二进制插桩:</strong><br><a href="https://tech.meituan.com/2018/12/27/ios-increment-coverage.html">增量代码覆盖率监控</a></p>
-<h3 id="7-Asset-car图片压缩空间配置"><a href="#7-Asset-car图片压缩空间配置" class="headerlink" title="7. Asset.car图片压缩空间配置"></a>7. Asset.car图片压缩空间配置</h3><p>设置<code>Build Settings-Asset Catalog Compiler Options-Optimization设置为space；</code><br>可以改变actool在构建Assets.car时选取的编码压缩算法。  </p>
-<p>使用如下命令,可以把对应信息生成.json文件，用于对比不同:<br><code>xcrun --sdk iphoneos assetutil --info Assets.car &gt; Assets.json</code></p>
-<h3 id="8-TEXT段加密绕过-iOS12及以前"><a href="#8-TEXT段加密绕过-iOS12及以前" class="headerlink" title="8. _TEXT段加密绕过(iOS12及以前)"></a>8. _TEXT段加密绕过(<code>iOS12及以前</code>)</h3><h3 id="8-1-TEXT-段迁移"><a href="#8-1-TEXT-段迁移" class="headerlink" title="8.1 __TEXT 段迁移"></a>8.1 <code>__TEXT</code> 段迁移</h3><p><code>Apple</code>官方会将<strong>Mach-O</strong>的<code>__TEXT</code>段进行<a href="https://tech.meituan.com/2021/11/25/fairplay-drm.html">Fairplay</a>加密, 这个加密方式可能会对安装包的压缩比例产生影响, 从而影响到最终压缩包的大小. </p>
-<p>如果我们可以把<code>__TEXT</code>段中一些不必要的内容转移走, 规避掉加密行为, 那么我们在<code>__TEXT</code>段上的压缩有所收益.  </p>
-<p>在此需要注意的是, <a href="https://juejin.cn/post/6911121493573402638#heading-17"><code>__TEXT</code>段迁移</a>降低的是下载的大小, 即下载压缩包的大小, <code>App Store</code>上显示的包大小, 即解压缩后实际安装大小则变化不明显.</p>
-<figure class="highlight sqf"><table><tr><td class="code"><pre><span class="line">-Wl,-rename_section,<span class="variable">__TEXT</span>,<span class="variable">__cstring</span>,<span class="variable">__RODATA</span>,<span class="variable">__cstring</span></span><br><span class="line">-Wl,-rename_section,<span class="variable">__TEXT</span>,<span class="variable">__objc_methname</span>,<span class="variable">__RODATA</span>,<span class="variable">__objc_methname</span></span><br><span class="line">-Wl,-rename_section,<span class="variable">__TEXT</span>,<span class="variable">__objc_classname</span>,<span class="variable">__RODATA</span>,<span class="variable">__objc_classname</span></span><br><span class="line">-Wl,-rename_section,<span class="variable">__TEXT</span>,<span class="variable">__objc_methtype</span>,<span class="variable">__RODATA</span>,<span class="variable">__objc_methtype</span></span><br><span class="line">-Wl,-rename_section,<span class="variable">__TEXT</span>,<span class="variable">__gcc_except_tab</span>,<span class="variable">__RODATA</span>,<span class="variable">__gcc_except_tab</span></span><br><span class="line">-Wl,-rename_section,<span class="variable">__TEXT</span>,<span class="variable">__const</span>,<span class="variable">__RODATA</span>,<span class="variable">__const</span></span><br><span class="line">-Wl,-rename_section,<span class="variable">__TEXT</span>,<span class="variable">__dof_RACCompou</span>,<span class="variable">__RODATA</span>,<span class="variable">__dof_RACCompou</span></span><br><span class="line">-Wl,-rename_section,<span class="variable">__TEXT</span>,<span class="variable">__dof_RACSignal</span>,<span class="variable">__RODATA</span>,<span class="variable">__dof_RACSignal</span></span><br><span class="line">-Wl,-rename_section,<span class="variable">__TEXT</span>,<span class="variable">__text</span>,<span class="variable">__WB_TEXT</span>,<span class="variable">__text</span></span><br><span class="line">-Wl,-rename_section,<span class="variable">__TEXT</span>,<span class="variable">__stubs</span>,<span class="variable">__WB_TEXT</span>,<span class="variable">__stubs</span></span><br><span class="line">-Wl,-rename_section,<span class="variable">__TEXT</span>,<span class="variable">__textcoal_nt</span>,<span class="variable">__WB_TEXT</span>,<span class="variable">__text</span>,</span><br><span class="line">-Wl,-rename_section,<span class="variable">__TEXT</span>,<span class="variable">__StaticInit</span>,<span class="variable">__WB_TEXT</span>,<span class="variable">__text</span></span><br><span class="line">-Wl,-segprot,<span class="variable">__WB_TEXT</span>,rx,rx</span><br></pre></td></tr></table></figure>
-<p>迁移过后<code>Mac-O</code>中<code>LoadCommand</code>结构:<br><img src="https://github.com/GOATRobery/common-Resources/blob/main/images/rename_section_TEXT.jpg?raw=true" alt="LC_TEXT"> </p>
-<p><code>__TEXT</code>段迁移之后, iOS12.5版本真机测验其压缩的包比例确如所说, 压缩比例在30%左右。</p>
-<h3 id="8-2-二进制压缩"><a href="#8-2-二进制压缩" class="headerlink" title="8.2 二进制压缩"></a>8.2 二进制压缩</h3><h3 id="9-BitCode优化-Xcode-14以前"><a href="#9-BitCode优化-Xcode-14以前" class="headerlink" title="9. BitCode优化(Xcode 14以前)"></a>9. BitCode优化(<code>Xcode 14以前</code>)</h3><p><strong>BitCode:</strong><br>位码是已编译程序的中间表示形式。(我们上传到<strong>App Store Connect</strong>的包含位码的应用程序将被编译并链接到<strong>App Store</strong>上。包含位码将允许苹果在未来重新优化你的应用二进制，而无需向<strong>App Store</strong>提交新版本的应用), 在打包发版本阶段, 大多时候我们并不需要这一中间产物。 </p>
-<p><strong>Xcode 14</strong>自动帮我们设置为 <code>NO</code>, <a href="https://developer.apple.com/documentation/Xcode-Release-Notes/xcode-14-release-notes#Deprecations">官方自Xcode14开始废弃Bitcode</a>。</p>
-<h3 id="10-静态扫描工具推荐"><a href="#10-静态扫描工具推荐" class="headerlink" title="10. 静态扫描工具推荐"></a>10. 静态扫描工具推荐</h3><ul>
-<li><a href="https://github.com/wuba/WBBlades">WBBlades (基于otool+mach-o的检测技术)</a></li>
-</ul>
-<hr>
-<h2 id="四、-资源优化"><a href="#四、-资源优化" class="headerlink" title="四、 资源优化"></a>四、 资源优化</h2><h3 id="资源优化"><a href="#资源优化" class="headerlink" title="资源优化:"></a>资源优化:</h3><h3 id="1-无用资源清理"><a href="#1-无用资源清理" class="headerlink" title="1. 无用资源清理"></a>1. 无用资源清理</h3><p>主要是重复图片资源, 长期迭代下来难免有重复的图片, 这些重复的图片没有必要双份或者多份。 简单高效的处理手段就是使用筛选脚本工具, 这些工具大多通过正则匹配的方式扫描代码中<code>imageNamed:</code>或<code>imageWithContentsOfFile:</code>是否有包含图片名或图片名拼接的方式引入项目。 工具有很多,在此不一一列举。  </p>
-<p>实际操作过程中, 我们发现很多图片会有误判的情况, 筛选只是第一步, 逐个确认是否使用记录使用模块, 最后验证确认等才是最主要的工作内容。</p>
-<p><img src="https://github.com/GOATRobery/common-Resources/blob/main/1_TAxGbMd_ZrFFR6qlC_9m7g.gif?raw=true" alt="LSUnusedResources"></p>
-<h3 id="2-重复或类似资源资源合并"><a href="#2-重复或类似资源资源合并" class="headerlink" title="2. 重复或类似资源资源合并"></a>2. 重复或类似资源资源合并</h3><ul>
-<li>重复图片精简</li>
-<li>库文件重复逻辑合并, 共同依赖底层功能如<code>OpenSSL</code>抽离成动态库, 链接阶段<code>share cache</code></li>
-</ul>
-<h3 id="3-资源压缩"><a href="#3-资源压缩" class="headerlink" title="3. 资源压缩"></a>3. 资源压缩</h3><p><strong>避免无损压缩:</strong> </p>
-<p><strong>Xcode</strong>中，构建<strong>Asset Catalog</strong>的工具<strong>actool</strong>会首先对<strong>Asset Catalog</strong>中的 <strong>png</strong> 图片进行解码，得到<strong>Bitmap</strong>数据，然后再运用<strong>actool</strong>的编码压缩算法进行编码压缩处理。无损压缩通过变换图片的编码压缩算法减少大小，但是不会改变<strong>Bitmap</strong> 数据。对于<strong>actool</strong>来说，它接收的输入没有改变，所以无损压缩无法优化<strong>Assets.car</strong>的大小。 </p>
-<p><strong>压缩策略:</strong>  </p>
-<ul>
-<li>采用有损压缩方式, 最大化Apple图片压缩优化比例。  </li>
-<li>更换显示图片文件格式, 如: <code>HEIC</code>、<code>iconfront</code>、<code>.webpg</code>、<code>.pdf</code>、<code>.svg</code>等。<br>未证实说法: 使用<code>pdf</code>格式图片, Apple自动转化为所需要的图片。</li>
-</ul>
-<p>除图片资源外, 视频、音频等本地资源也可压缩文件的体积。</p>
-<h3 id="4-本地资源远端加载-远端服务器请求-官方ODR"><a href="#4-本地资源远端加载-远端服务器请求-官方ODR" class="headerlink" title="4. 本地资源远端加载(远端服务器请求&#x2F;官方ODR)"></a>4. 本地资源远端加载(远端服务器请求&#x2F;官方ODR)</h3><p><a href="https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/On_Demand_Resources_Guide/index.html#//apple_ref/doc/uid/TP40015083">On Demand Resources</a>延迟加载资源, 通过设置<code>Resources Tag</code>标记位, 可选择随包下载以及按需加载资源。  </p>
-<ul>
-<li><code>Initial install tags</code>: 此种标签的资源，会随着 app 从 App Store 下载而下载，但是会影响 app 的 ipa 大小，也就是说此种资源会包含在 ipa 内。和开发工具默认行为一致 </li>
-<li><code>Prefetch tag order</code>: 此种标签会在 app 下载后，开始下载相应的资源，此种资源并不会影响 ipa 的大小，也就是说此种资源并不包含在 ipa 内。此场景常用游戏场景，不过多赘述 </li>
-<li><code>Dowloaded only on demand</code>: 此种标签下的资源，会在必要的时候，主动触发下载，这是我们开发者自己控制下载时机的。</li>
-</ul>
-<hr>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>引用自<a href="https://live.byteoc.com/9281/2083745">字节跳动技术分享沙龙直播</a>内容。  </p>
-<p><strong>安装包体积优化方案总结:</strong><br><img src="https://github.com/GOATRobery/common-Resources/blob/e37c50bdae470efcf81329b00f5dd58e648bd9cf/%E5%AE%89%E8%A3%85%E5%8C%85%E4%BD%93%E7%A7%AF%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88%E6%80%BB%E7%BB%93.png?raw=true" alt="安装包体积优化方案总结"></p>
-<p><strong>无用代码筛查:</strong><br><img src="https://github.com/GOATRobery/common-Resources/blob/e37c50bdae470efcf81329b00f5dd58e648bd9cf/%E6%97%A0%E7%94%A8%E4%BB%A3%E7%A0%81%E7%AD%9B%E6%9F%A5.png?raw=true" alt="无用代码筛查">   </p>
-<p><strong>编译配置优化:</strong><br><img src="https://raw.githubusercontent.com/GOATRobery/common-Resources/main/images/zoom-in-crop-mark_1512_0_0_0.webp" alt="编译配置优化"></p>
-<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
-<li><a href="https://developer.apple.com/documentation/xcode/build-settings-reference/">Xcode配置说明官方文档</a>  </li>
-<li><a href="https://help.apple.com/xcode/mac/11.4/#/itcaec37c2a6?sub=dev881878d77">Xcode配置参数说明</a></li>
-<li><a href="https://mp.weixin.qq.com/s/I6DH5RvkMh_-bxGpkAKBPA">Alibaba安装包瘦身(精华)</a></li>
-<li><a href="https://blog.csdn.net/ByteDanceTech/article/details/112504772">抖音品质建设 - iOS 安装包大小优化实践篇</a></li>
-<li><a href="https://zhuanlan.zhihu.com/p/516628980">搜狐技术,iOS包体积优化</a></li>
-<li><a href="https://mp.weixin.qq.com/s/_Mvl0FGriKsvAyRheU2Z7w">搜狐技术,正经分析包体积优化</a></li>
-<li><a href="https://sq.sf.163.com/blog/article/200384401846304768">网易Cocoapods 中的优化选项配置</a></li>
-<li><a href="https://mp.weixin.qq.com/s/oyqAa8wKdioI5ZDG5LjkfA">今日头条减包(大部分已过时)</a></li>
-<li><a href="https://mp.weixin.qq.com/s?__biz=MzI1MzYzMjE0MQ==&mid=2247487459&idx=1&sn=3dd9276f5af78ca5a377adec37e3e916&chksm=e9d0c401dea74d17e9f1bdd5ea764cc0cd7e845c6ebadde752d36608306b09e762a1681c7252&scene=21#wechat_redirect">今日头条二进制压缩减包</a></li>
-<li><a href="https://tech.meituan.com/2018/12/27/ios-increment-coverage.html">美团代码覆盖率检测</a></li>
-<li><a href="https://my.oschina.net/u/4939618/blog/10112383">百度Clang插件静态扫描无用代码</a> </li>
-<li><a href="https://blog.gocy.tech/2017/09/12/DetectingUselessCodeWithClang-p1/">Clang插件实践</a></li>
-<li><a href="https://www.zybuluo.com/qidiandasheng/note/1662385">PMD扫描未使用项目源码</a></li>
-<li><a href="https://mp.weixin.qq.com/s/QFtlp0sG4eJRZ7NrDMAopw">基于Mach-O的静态扫描(58技术)</a></li>
-<li><a href="https://www.jianshu.com/p/c41ad330e81c">基于Mach-O的反汇编无用类检测(竹立佬)</a> </li>
-<li><a href="https://medium.com/@manojaher/app-size-reduction-903a04646e3a">App size-reduction Optimizing builds for lesser sizes</a></li>
-<li><a href="https://juejin.cn/post/7260819638123380793">upsteam安装包大小优化笔记</a></li>
-</ul>
-<!--more-->]]></content>
+`__TEXT`段迁移之后, iOS12.5版本真机测验其压缩的包比例确如所说, 压缩比例在30%左右。
+
+### 8.2 二进制压缩
+
+
+### 9. BitCode优化(`Xcode 14以前`) 
+**BitCode:** 
+位码是已编译程序的中间表示形式。(我们上传到**App Store Connect**的包含位码的应用程序将被编译并链接到**App Store**上。包含位码将允许苹果在未来重新优化你的应用二进制，而无需向**App Store**提交新版本的应用), 在打包发版本阶段, 大多时候我们并不需要这一中间产物。 
+
+**Xcode 14**自动帮我们设置为 `NO`, [官方自Xcode14开始废弃Bitcode](https://developer.apple.com/documentation/Xcode-Release-Notes/xcode-14-release-notes#Deprecations)。
+
+
+### 10. 静态扫描工具推荐
+- [WBBlades (基于otool+mach-o的检测技术)](https://github.com/wuba/WBBlades) 
+
+
+***
+
+## 四、 资源优化
+### 资源优化: 
+
+### 1. 无用资源清理 
+主要是重复图片资源, 长期迭代下来难免有重复的图片, 这些重复的图片没有必要双份或者多份。 简单高效的处理手段就是使用筛选脚本工具, 这些工具大多通过正则匹配的方式扫描代码中`imageNamed:`或`imageWithContentsOfFile:`是否有包含图片名或图片名拼接的方式引入项目。 工具有很多,在此不一一列举。  
+
+实际操作过程中, 我们发现很多图片会有误判的情况, 筛选只是第一步, 逐个确认是否使用记录使用模块, 最后验证确认等才是最主要的工作内容。
+
+![LSUnusedResources](https://github.com/GOATRobery/common-Resources/blob/main/1_TAxGbMd_ZrFFR6qlC_9m7g.gif?raw=true)
+
+### 2. 重复或类似资源资源合并 
+- 重复图片精简
+- 库文件重复逻辑合并, 共同依赖底层功能如`OpenSSL`抽离成动态库, 链接阶段`share cache`
+
+### 3. 资源压缩 
+**避免无损压缩:** 
+
+**Xcode**中，构建**Asset Catalog**的工具**actool**会首先对**Asset Catalog**中的 **png** 图片进行解码，得到**Bitmap**数据，然后再运用**actool**的编码压缩算法进行编码压缩处理。无损压缩通过变换图片的编码压缩算法减少大小，但是不会改变**Bitmap** 数据。对于**actool**来说，它接收的输入没有改变，所以无损压缩无法优化**Assets.car**的大小。 
+
+**压缩策略:**  
+
+- 采用有损压缩方式, 最大化Apple图片压缩优化比例。  
+- 更换显示图片文件格式, 如: `HEIC`、`iconfront`、`.webpg`、`.pdf`、`.svg`等。
+未证实说法: 使用`pdf`格式图片, Apple自动转化为所需要的图片。
+
+除图片资源外, 视频、音频等本地资源也可压缩文件的体积。
+
+### 4. 本地资源远端加载(远端服务器请求/官方ODR)  
+[On Demand Resources](https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/On_Demand_Resources_Guide/index.html#//apple_ref/doc/uid/TP40015083)延迟加载资源, 通过设置`Resources Tag`标记位, 可选择随包下载以及按需加载资源。  
+
+- `Initial install tags`: 此种标签的资源，会随着 app 从 App Store 下载而下载，但是会影响 app 的 ipa 大小，也就是说此种资源会包含在 ipa 内。和开发工具默认行为一致 
+- `Prefetch tag order`: 此种标签会在 app 下载后，开始下载相应的资源，此种资源并不会影响 ipa 的大小，也就是说此种资源并不包含在 ipa 内。此场景常用游戏场景，不过多赘述 
+- `Dowloaded only on demand`: 此种标签下的资源，会在必要的时候，主动触发下载，这是我们开发者自己控制下载时机的。
+
+
+
+*** 
+
+## 总结 
+引用自[字节跳动技术分享沙龙直播](https://live.byteoc.com/9281/2083745
+)内容。  
+
+**安装包体积优化方案总结:**
+![安装包体积优化方案总结](https://github.com/GOATRobery/common-Resources/blob/e37c50bdae470efcf81329b00f5dd58e648bd9cf/%E5%AE%89%E8%A3%85%E5%8C%85%E4%BD%93%E7%A7%AF%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88%E6%80%BB%E7%BB%93.png?raw=true)
+
+**无用代码筛查:**
+![无用代码筛查](https://github.com/GOATRobery/common-Resources/blob/e37c50bdae470efcf81329b00f5dd58e648bd9cf/%E6%97%A0%E7%94%A8%E4%BB%A3%E7%A0%81%E7%AD%9B%E6%9F%A5.png?raw=true)   
+
+**编译配置优化:**
+![编译配置优化](https://raw.githubusercontent.com/GOATRobery/common-Resources/main/images/zoom-in-crop-mark_1512_0_0_0.webp)
+
+## 写在最后 
+
+
+## 参考文档
+- [Xcode配置说明官方文档](https://developer.apple.com/documentation/xcode/build-settings-reference/)  
+- [Xcode配置参数说明](https://help.apple.com/xcode/mac/11.4/#/itcaec37c2a6?sub=dev881878d77)
+- [Alibaba安装包瘦身(精华)](https://mp.weixin.qq.com/s/I6DH5RvkMh_-bxGpkAKBPA)
+- [抖音品质建设 - iOS 安装包大小优化实践篇](https://blog.csdn.net/ByteDanceTech/article/details/112504772)
+- [搜狐技术,iOS包体积优化](https://zhuanlan.zhihu.com/p/516628980)
+- [搜狐技术,正经分析包体积优化](https://mp.weixin.qq.com/s/_Mvl0FGriKsvAyRheU2Z7w)
+- [网易Cocoapods 中的优化选项配置](https://sq.sf.163.com/blog/article/200384401846304768)
+- [今日头条减包(大部分已过时)](https://mp.weixin.qq.com/s/oyqAa8wKdioI5ZDG5LjkfA)
+- [今日头条二进制压缩减包](https://mp.weixin.qq.com/s?__biz=MzI1MzYzMjE0MQ==&amp;mid=2247487459&amp;idx=1&amp;sn=3dd9276f5af78ca5a377adec37e3e916&amp;chksm=e9d0c401dea74d17e9f1bdd5ea764cc0cd7e845c6ebadde752d36608306b09e762a1681c7252&amp;scene=21#wechat_redirect)
+- [美团代码覆盖率检测](https://tech.meituan.com/2018/12/27/ios-increment-coverage.html)
+- [百度Clang插件静态扫描无用代码](https://my.oschina.net/u/4939618/blog/10112383) 
+- [Clang插件实践](https://blog.gocy.tech/2017/09/12/DetectingUselessCodeWithClang-p1/)
+- [PMD扫描未使用项目源码](https://www.zybuluo.com/qidiandasheng/note/1662385)
+- [基于Mach-O的静态扫描(58技术)](https://mp.weixin.qq.com/s/QFtlp0sG4eJRZ7NrDMAopw)
+- [基于Mach-O的反汇编无用类检测(竹立佬)](https://www.jianshu.com/p/c41ad330e81c) 
+- [App size-reduction Optimizing builds for lesser sizes](https://medium.com/@manojaher/app-size-reduction-903a04646e3a)
+- [upsteam安装包大小优化笔记](https://juejin.cn/post/7260819638123380793)
+
+&lt;!--more--&gt;
+</code></pre>
+]]></content>
       <categories>
         <category>iOS</category>
       </categories>
