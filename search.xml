@@ -269,7 +269,8 @@
   <entry>
     <title>dyld加载流程</title>
     <url>/2024/02/01/dyld%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B/</url>
-    <content><![CDATA[<p>参考链接:<a href="https://developer.aliyun.com/article/924936?spm=a2c6h.24874632.expert-profile.43.393013000BVrBO">dyld加载流程分析</a></p>
+    <content><![CDATA[<p>###参考链接:</p>
+<p><a href="https://developer.aliyun.com/article/924936?spm=a2c6h.24874632.expert-profile.43.393013000BVrBO">dyld加载流程分析</a><br><a href="https://zhuanlan.zhihu.com/p/413263438">dyld64加载流程</a></p>
 ]]></content>
       <tags>
         <tag>iOS底层</tag>
